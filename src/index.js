@@ -19,12 +19,6 @@ function onInputFetchCounties(e) {
   }
   fetchCountries(e.target.value.trim())
     .then(res => {
-      if (!res.ok) {
-        throw new Error(res.status);
-      }
-      return res.json();
-    })
-    .then(res => {
       if (res.length > 10) {
         countiesListRef.innerHTML = '';
         countryInfoRef.innerHTML = '';
@@ -32,36 +26,40 @@ function onInputFetchCounties(e) {
           'Too many matches found. Please enter a more specific name.'
         );
       } else if (res.length >= 2 && res.length <= 10) {
-        const itemList = res
-          .map(el => {
-            return `
-              <li class="country-item">
-                <img src=${el.flags.svg} alt=${el.name.official} width="30" height='20' />
-                ${el.name.official}
-              </li>`;
-          })
-          .join('');
         countryInfoRef.innerHTML = '';
-        countiesListRef.innerHTML = itemList;
+        countiesListRef.innerHTML = createItems(res);
       } else {
-        const countryInfo = res
-          .map(el => {
-            const languages = Object.values(el.languages).join(', ');
-            return `
-              <div class="country-title">
-                <img src=${el.flags.svg} alt=${el.name.official} width="40" height='30'/>
-                <h1>${el.name.official}</h1>
-              </div>
-              <p class="country-desc"><span>Capital:</span> ${el.capital}</p>
-              <p class="country-desc"><span>Population:</span> ${el.population}</p>
-              <p class="country-desc"><span>Languages:</span> ${languages}</p>`;
-          })
-          .join('');
         countiesListRef.innerHTML = '';
-        countryInfoRef.innerHTML = countryInfo;
+        countryInfoRef.innerHTML = createCountryMarkup(res);
       }
     })
     .catch(() => {
       Notify.failure('Oops, there is no country with that name');
     });
+}
+
+function createItems(item) {
+  return item.map(el => {
+    return `
+      <li class="country-item">
+        <img src=${el.flags.svg} alt=${el.name.official} width="30" height='20' />
+        ${el.name.official}
+      </li>`;
+  })
+  .join('');
+}
+
+function createCountryMarkup(arr) {
+  return arr.map(el => {
+    const languages = Object.values(el.languages).join(', ');
+    return `
+      <div class="country-title">
+        <img src=${el.flags.svg} alt=${el.name.official} width="40" height='30'/>
+        <h1>${el.name.official}</h1>
+      </div>
+      <p class="country-desc"><span>Capital:</span> ${el.capital}</p>
+      <p class="country-desc"><span>Population:</span> ${el.population}</p>
+      <p class="country-desc"><span>Languages:</span> ${languages}</p>`;
+  })
+  .join('');
 }
